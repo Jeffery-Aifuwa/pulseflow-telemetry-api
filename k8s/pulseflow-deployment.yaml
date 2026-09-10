@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
         - name: pulseflow
-          image: pulseflowreg001.azurecr.io/pulseflow-telemetry:v1
+          image: pulseflowreg001.azurecr.io/pulseflow-telemetry:latest
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 8000
