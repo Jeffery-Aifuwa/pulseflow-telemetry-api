@@ -202,4 +202,4 @@ kubectl delete svc pulseflow-loadbalancer
 # Destroy cloud infrastructure
 cd terraform
 terraform destroy -auto-approve
----
+```
