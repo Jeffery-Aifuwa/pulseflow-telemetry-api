@@ -90,11 +90,11 @@ graph TD
 CI/CD Workflow
 The automated deployment pipeline defined in .github/workflows/deploy.yaml executes the following sequence:
 
-Lint & Code Quality: Tests and lints Python code.
+- Lint & Code Quality: Tests and lints Python code.
 
-Build & Push: Uses Docker Buildx to build and tag images with Git commit SHA and pushes to ACR.
+- Build & Push: Uses Docker Buildx to build and tag images with Git commit SHA and pushes to ACR.
 
-Cluster Context Configuration: Logs into Azure via Service Principal credentials stored safely in GitHub Secrets.
+- Cluster Context Configuration: Logs into Azure via Service Principal credentials stored safely in GitHub Secrets.
 
 Declarative Deploy: Applies updated Kubernetes manifests and executes a rolling restart:
 
