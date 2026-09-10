@@ -18,7 +18,7 @@ graph TD
     classDef vis fill:#F47A20,stroke:#333,stroke-width:1px,color:#fff;
 
     %% CI/CD Flow
-    Push["Git Push to main"]:::git --> Actions["⚙️ GitHub Actions CI/CD<br>(Lint, Build, Push ACR, Deploy)"]:::cicd
+    Push["Git Push to main"]:::git --> Actions["GitHub Actions CI/CD<br>(Lint, Build, Push ACR, Deploy)"]:::cicd
     Actions --> Traffic["External Traffic"]:::net
     Traffic --> LB["Azure LoadBalancer<br>(Public IP)"]:::net
 
