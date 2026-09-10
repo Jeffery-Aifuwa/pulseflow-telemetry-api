@@ -1,0 +1,30 @@
+# Terraform local state and binaries
+**/.terraform/*
+*.tfstate
+*.tfstate.*
+crash.log
+crash.*.log
+*.tfvars
+*.tfvars.json
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json
+.terraformrc
+terraform.rc
+
+# Python cache
+__pycache__/
+*.py[cod]
+*$py.class
+.venv/
+venv/
+env/
+
+# Environment files
+.env
+
+# OS / Editor junk
+.DS_Store
+Thumbs.db
+.vscode/

@@ -1,0 +1,46 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: pulseflow-telemetry
+  labels:
+    app: pulseflow
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: pulseflow
+  template:
+    metadata:
+      labels:
+        app: pulseflow
+    spec:
+      containers:
+        - name: pulseflow
+          image: pulseflowreg001.azurecr.io/pulseflow-telemetry:v1
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8000
+          env:
+            - name: REDIS_HOST
+              value: "redis-service"
+            - name: REDIS_PORT
+              value: "6379"
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "128Mi"
+            limits:
+              cpu: "250m"
+              memory: "256Mi"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: pulseflow-loadbalancer
+spec:
+  type: LoadBalancer
+  selector:
+    app: pulseflow
+  ports:
+    - port: 80
+      targetPort: 8000
