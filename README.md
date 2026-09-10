@@ -87,7 +87,7 @@ graph TD
 └── README.md
 ```
 
-CI/CD Workflow
+### CI/CD Workflow
 The automated deployment pipeline defined in .github/workflows/deploy.yaml executes the following sequence:
 
 - Lint & Code Quality: Tests and lints Python code.
@@ -96,7 +96,7 @@ The automated deployment pipeline defined in .github/workflows/deploy.yaml execu
 
 - Cluster Context Configuration: Logs into Azure via Service Principal credentials stored safely in GitHub Secrets.
 
-Declarative Deploy: Applies updated Kubernetes manifests and executes a rolling restart:
+### Declarative Deploy: Applies updated Kubernetes manifests and executes a rolling restart:
 
 ```
 kubectl set image deployment/pulseflow-telemetry pulseflow-telemetry=${{ env.ACR_LOGIN_SERVER }}/pulseflow-telemetry:${{ github.sha }}
@@ -105,7 +105,7 @@ kubectl rollout status deployment/pulseflow-telemetry
 
 ## Deployment Workflow
 
-1. Provision the Cloud Infrastructure
+### Provision the Cloud Infrastructure
 
 ```
 cd terraform
@@ -120,14 +120,14 @@ Pull the cluster credentials locally:
 az aks get-credentials --resource-group pulseflow-rg --name pulseflow-aks --overwrite-existing
 ```
 
-2. Build and Push the Application Image
+### Build and Push the Application Image
 Build and tag the container directly inside ACR to streamline deployment:
 
 ```
 az acr build --registry pulseflowreg001 --image pulseflow-telemetry:latest ../app
 ```
 
-3. Deploy the Observability Stack
+### Deploy the Observability Stack
 Install the Prometheus and Grafana operator stack via Helm:
 
 ```
@@ -139,7 +139,7 @@ helm install monitoring prometheus-community/kube-prometheus-stack \
   --create-namespace
 ```
 
-4. Deploy Workloads and Target Monitors
+### Deploy Workloads and Target Monitors
 
 ```
 kubectl apply -f k8s/redis-deployment.yaml
@@ -149,13 +149,13 @@ kubectl apply -f k8s/pulseflow-servicemonitor.yaml
 
 ## Verification & Metrics
 
-1. Verify Pod Status:
+### Verify Pod Status:
 
 ```
 kubectl get pods -A
 ```
 
-2. Generate Traffic:
+### Generate Traffic:
 
 ```
 APP_IP=$(kubectl get svc pulseflow-loadbalancer -o jsonpath='{.status.loadBalancer.ingress[0].ip}')
@@ -164,7 +164,7 @@ APP_IP=$(kubectl get svc pulseflow-loadbalancer -o jsonpath='{.status.loadBalanc
 for i in {1..30}; do curl -s -o /dev/null -w "%{http_code} " http://$APP_IP/; sleep 0.5; done
 ```
 
-3. Inspect Metrics in Grafana:
+### Inspect Metrics in Grafana:
 Forward the Grafana service port locally:
 
 ```
@@ -183,13 +183,13 @@ kubectl get secret --namespace monitoring monitoring-grafana -o jsonpath="{.data
 
 ## Visual Verification
 
-1. Application Frontend UI
+### Application Frontend UI
 The web dashboard running live on the public Azure LoadBalancer IP:
 
-2. Live Application Telemetry in Grafana
+### Live Application Telemetry in Grafana
 Real-time request metrics captured and visualized during simulated traffic spikes:
 
-3. Kubernetes Cluster & Pod Health
+### Kubernetes Cluster & Pod Health
 Workloads and monitoring pods healthy and operational on AKS:
 
 ## Teardown
