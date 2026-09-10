@@ -186,11 +186,27 @@ kubectl get secret --namespace monitoring monitoring-grafana -o jsonpath="{.data
 ### Application Frontend UI
 The web dashboard running live on the public Azure LoadBalancer IP:
 
+Before:
+![Application UI](visuals/Application_Frontend_UI_1.png)
+
+After:
+![Application UI](visuals/Application_Frontend_UI_2.png)
+
 ### Live Application Telemetry in Grafana
 Real-time request metrics captured and visualized during simulated traffic spikes:
 
+![Traffic Monitoring](visuals/Application_Telemetry_Grafana_1.png)
+
+
+![Traffic Monitoring](visuals/Application_Telemetry_Grafana_2.png)
+
 ### Kubernetes Cluster & Pod Health
 Workloads and monitoring pods healthy and operational on AKS:
+
+![Pod Health](visuals/Monitoring_pods_1.png)
+
+
+![Pod Health](visuals/Monitoring_pods_2.png)
 
 ## Teardown
 To cleanly release public IP allocations and deprovision resources:
