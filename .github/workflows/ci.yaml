@@ -1,0 +1,48 @@
+name: PulseFlow CI-CD
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "app/**"
+      - "Dockerfile"
+      - ".github/workflows/ci.yaml"
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Source Code
+        uses: actions/checkout@v4
+
+      - name: Azure CLI Login
+        uses: azure/login@v2
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - name: Authenticate to ACR
+        run: |
+          az acr login --name ${{ secrets.ACR_NAME }}
+
+      - name: Build and Push Docker Image
+        run: |
+          IMAGE_TAG="${{ secrets.ACR_NAME }}.azurecr.io/pulseflow-telemetry:${{ github.sha }}"
+          LATEST_TAG="${{ secrets.ACR_NAME }}.azurecr.io/pulseflow-telemetry:latest"
+          
+          docker build -t $IMAGE_TAG -t $LATEST_TAG .
+          docker push $IMAGE_TAG
+          docker push $LATEST_TAG
+
+      - name: Set AKS Context
+        uses: azure/aks-set-context@v3
+        with:
+          resource-group: pulseflow-rg
+          cluster-name: pulseflow-aks
+
+      - name: Deploy Rolling Update to AKS
+        run: |
+          kubectl set image deployment/pulseflow-telemetry \
+            pulseflow=${{ secrets.ACR_NAME }}.azurecr.io/pulseflow-telemetry:${{ github.sha }}
+          kubectl rollout status deployment/pulseflow-telemetry --timeout=120s
