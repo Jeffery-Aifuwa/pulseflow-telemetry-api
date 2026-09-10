@@ -212,10 +212,8 @@ Workloads and monitoring pods healthy and operational on AKS:
 To cleanly release public IP allocations and deprovision resources:
 
 ```
-# Delete external service first to unbind Azure Load Balancer
 kubectl delete svc pulseflow-loadbalancer
 
-# Destroy cloud infrastructure
 cd terraform
 terraform destroy -auto-approve
 ```
