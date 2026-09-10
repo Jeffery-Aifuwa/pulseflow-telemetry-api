@@ -25,7 +25,7 @@ graph TD
     %% Default Namespace Cluster
     subgraph AKS_Default ["AKS Cluster: default namespace"]
         LB --> PodApp["PulseFlow Pod (FastAPI + Web UI)<br>Port 8000: / (UI), /api, /metrics"]:::app
-        PodApp -->|Writes state / events| PodRedis["🗄️ Redis Pod<br>(In-Memory Data Store)"]:::data
+        PodApp -->|Writes state / events| PodRedis["Redis Pod<br>(In-Memory Data Store)"]:::data
     end
 
     %% Monitoring Namespace Cluster
