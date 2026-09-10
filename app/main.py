@@ -170,7 +170,7 @@ def dashboard():
                 <div class="brand-dot"></div>
                 <h1>PulseFlow</h1>
             </div>
-            <p class="subtitle">Cloud Telemetry & Ingestion Engine</p>
+            <p class="subtitle">Cloud Telemetry Engine • v1.1 Automated CI/CD</p>
 
             <div class="metric-box">
                 <div class="metric-label">Live Ingestion Counter</div>
