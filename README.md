@@ -45,20 +45,6 @@ graph TD
     PodApp -.->|Scraped every 15s| Prom
 ```
 
-## Key Architecture Decisions
-
-- Terraform: Used to make Azure infrastructure reproducible and version-controlled.
-
-- AKS: Provides managed Kubernetes orchestration for the application workloads.
-
-- ACR: Provides a private container registry integrated with Azure.
-
-- Managed Identity: Avoids storing static ACR credentials in Kubernetes.
-
-- Prometheus/Grafana: Provides application and Kubernetes observability.
-
-- Redis: Provides internal application state storage without exposing Redis publicly.
-
 ## Key Implementation Details
 
 * **Automated CI/CD Pipeline (GitHub Actions):** Every push to `main` triggers automated linting, container builds pushed to Azure Container Registry (ACR) via short-lived credentials, and rolling updates designed to maintain application availability.
@@ -240,6 +226,20 @@ Workloads and monitoring pods healthy and operational on AKS:
 - Application metrics instrumentation and scraping
 - Monitoring and visualization with Prometheus and Grafana
 - Helm-based deployment of Kubernetes observability tooling
+
+### Key Architecture Decisions
+
+- Terraform: Used to make Azure infrastructure reproducible and version-controlled.
+
+- AKS: Provides managed Kubernetes orchestration for the application workloads.
+
+- ACR: Provides a private container registry integrated with Azure.
+
+- Managed Identity: Avoids storing static ACR credentials in Kubernetes.
+
+- Prometheus/Grafana: Provides application and Kubernetes observability.
+
+- Redis: Provides internal application state storage without exposing Redis publicly.
 
 ## Teardown
 To cleanly release public IP allocations and deprovision resources:
