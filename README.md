@@ -2,6 +2,10 @@
 
 A containerized telemetry ingestion service running on Azure Kubernetes Service (AKS), automated with Terraform and monitored via the Prometheus Operator and Grafana.
 
+## Overview
+
+PulseFlow is a containerized telemetry ingestion service built to demonstrate a complete cloud-native deployment workflow. The project focuses on provisioning Azure infrastructure with Terraform, deploying and updating workloads on AKS, automating delivery through GitHub Actions, and monitoring application and cluster health with Prometheus and Grafana.
+
 ## Architecture
 
 The service exposes an HTTP endpoint backed by an internal Redis cache. Cloud infrastructure is provisioned through Terraform, with Kubernetes handling pod scheduling and service exposure via an Azure Load Balancer.
@@ -12,15 +16,19 @@ graph TD
     classDef git fill:#f05032,stroke:#333,stroke-width:1px,color:#fff;
     classDef cicd fill:#2088FF,stroke:#333,stroke-width:1px,color:#fff;
     classDef net fill:#0078D4,stroke:#333,stroke-width:1px,color:#fff;
+    classDef registry fill:#0078D4,stroke:#333,stroke-width:1px,color:#fff;
     classDef app fill:#008080,stroke:#333,stroke-width:1px,color:#fff;
     classDef data fill:#DC382D,stroke:#333,stroke-width:1px,color:#fff;
     classDef mon fill:#E6522C,stroke:#333,stroke-width:1px,color:#fff;
     classDef vis fill:#F47A20,stroke:#333,stroke-width:1px,color:#fff;
 
     %% CI/CD Flow
-    Push["Git Push to main"]:::git --> Actions["GitHub Actions CI/CD<br>(Lint, Build, Push ACR, Deploy)"]:::cicd
-    Actions --> Traffic["External Traffic"]:::net
-    Traffic --> LB["Azure LoadBalancer<br>(Public IP)"]:::net
+    Push["Git Push to main"]:::git --> Actions["GitHub Actions CI/CD<br>(Lint, Build, Push)"]:::cicd
+    Actions --> ACR["Azure Container Registry<br>(Container Images)"]:::registry
+    ACR -.->|Image pulled during deployment| PodApp
+
+    %% Traffic Flow
+    Traffic["External Traffic"]:::net --> LB["Azure LoadBalancer<br>(Public IP)"]:::net
 
     %% Default Namespace Cluster
     subgraph AKS_Default ["AKS Cluster: default namespace"]
@@ -37,17 +45,31 @@ graph TD
     PodApp -.->|Scraped every 15s| Prom
 ```
 
+## Key Architecture Decisions
+
+- Terraform: Used to make Azure infrastructure reproducible and version-controlled.
+
+- AKS: Provides managed Kubernetes orchestration for the application workloads.
+
+- ACR: Provides a private container registry integrated with Azure.
+
+- Managed Identity: Avoids storing static ACR credentials in Kubernetes.
+
+- Prometheus/Grafana: Provides application and Kubernetes observability.
+
+- Redis: Provides internal application state storage without exposing Redis publicly.
+
 ## Key Implementation Details
 
-* **Automated CI/CD Pipeline (GitHub Actions):** Every commit pushed to `main` triggers automated linting, container builds pushed to Azure Container Registry (ACR) via short-lived credentials, and rolling zero-downtime updates directly to the AKS cluster.
+* **Automated CI/CD Pipeline (GitHub Actions):** Every push to `main` triggers automated linting, container builds pushed to Azure Container Registry (ACR) via short-lived credentials, and rolling updates designed to maintain application availability.
 
 * **Interactive Frontend UI:** The FastAPI application serves a web interface that allows users to trigger real-time telemetry events and interactively visualize Redis state updates directly from the browser.
 
-* **Passwordless Cluster Security (Azure Managed Identity):** AKS node pools authenticate with ACR using the cluster’s managed Kubelet identity assigned to the Azure `AcrPull` role. No static container registry passwords or `imagePullSecrets` are stored in Kubernetes manifests.
+* **Azure Managed Identity for ACR Authentication:** AKS node pools authenticate with ACR using the cluster’s managed Kubelet identity assigned to the Azure `AcrPull` role. No static container registry passwords or `imagePullSecrets` are stored in Kubernetes manifests.
 
-* **Declarative Scrape Targets:** Observability is driven by `kube-prometheus-stack`. Scraping is managed dynamically through a Kubernetes `ServiceMonitor` CRD that automatically discovers application pods across namespaces.
+* **Declarative Metrics Scraping:** Observability is configured using `kube-prometheus-stack` and a Kubernetes `ServiceMonitor` resource, allowing Prometheus to discover and scrape the application's metrics endpoint through its Kubernetes Service.
 
-* **Workload Isolation & Resource Bounds:** All deployments define explicit CPU/memory requests and limits to guarantee predictable pod scheduling and eliminate noisy-neighbor issues.
+* **Workload Resource Management:** Deployments define CPU and memory requests and limits to provide Kubernetes with resource requirements and constrain excessive container resource consumption.
 
 * **Infrastructure as Code (IaC):** Core cloud resources—Resource Group, Virtual Network, Subnets, AKS cluster, and ACR—are fully declared and managed via modular Terraform configurations.
 
@@ -121,9 +143,9 @@ az aks get-credentials --resource-group pulseflow-rg --name pulseflow-aks --over
 ```
 
 ### Build and Push the Application Image
-Build and tag the container directly inside ACR to streamline deployment:
+For manual deployments, the application image can be built directly in Azure Container Registry:
 
-```
+```bash
 az acr build --registry pulseflowreg001 --image pulseflow-telemetry:latest ../app
 ```
 
@@ -131,7 +153,7 @@ az acr build --registry pulseflowreg001 --image pulseflow-telemetry:latest ../ap
 Install the Prometheus and Grafana operator stack via Helm:
 
 ```
-helm repo add prometheus-community [https://prometheus-community.github.io/helm-charts](https://prometheus-community.github.io/helm-charts)
+helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
 helm repo update
 
 helm install monitoring prometheus-community/kube-prometheus-stack \
@@ -207,6 +229,17 @@ Workloads and monitoring pods healthy and operational on AKS:
 
 
 ![Pod Health](visuals/Monitoring_pods_2.png)
+
+### What This Project Demonstrates
+- Infrastructure provisioning with Terraform
+- Container image creation and registry management with Docker and ACR
+- Kubernetes workload deployment and service exposure on AKS
+- CI/CD automation with GitHub Actions
+- Azure Managed Identity for registry authentication
+- Kubernetes resource management
+- Application metrics instrumentation and scraping
+- Monitoring and visualization with Prometheus and Grafana
+- Helm-based deployment of Kubernetes observability tooling
 
 ## Teardown
 To cleanly release public IP allocations and deprovision resources:
